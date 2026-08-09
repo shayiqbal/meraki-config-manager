@@ -1,0 +1,37 @@
+{
+  "exportMetadata": {
+    "organizationId": "947101",
+    "organizationName": "Graybar",
+    "networkId": "L_585467951558195700",
+    "networkName": "31-GHIL"
+  },
+  "mode": "merge",
+  "localInternetBreakout": {
+    "description": "VPN exclusion rules only",
+    "custom": [
+      {"protocol": "any", "destination": "64.62.142.12/32", "port": "any"},
+      {"protocol": "any", "destination": "158.115.128.0/19", "port": "any"},
+      {"protocol": "any", "destination": "209.206.48.0/20", "port": "any"},
+      {"protocol": "any", "destination": "216.157.128.0/20", "port": "any"},
+      {"protocol": "any", "destination": "40.91.120.100/32", "port": "any"},
+      {"protocol": "dns", "destination": "cisco.com", "port": "any"},
+      {"protocol": "dns", "destination": "meraki.com", "port": "any"},
+      {"protocol": "dns", "destination": "meraki-applications.com", "port": "any"},
+      {"protocol": "dns", "destination": "threatgrid.com", "port": "any"}
+    ],
+    "majorApplications": [
+      {
+        "id": "meraki:vpnExclusion/application/2",
+        "name": "Office 365 Sharepoint"
+      }
+    ],
+    "applications": [
+      {
+        "id": "meraki:layer7/application/1208",
+        "name": "Microsoft Teams",
+        "protocol": "any"
+      }
+    ]
+  }
+}
+

@@ -1,0 +1,38 @@
+"""Environment-based application settings."""
+from __future__ import annotations
+
+import os
+from dataclasses import dataclass
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+
+@dataclass(frozen=True, slots=True)
+class Settings:
+    api_key: str
+    max_retries: int = 4
+    retry_base_seconds: float = 1.0
+    early_access: bool = True
+    log_path: Path = Path("logs/vpn_exclusion_manager.jsonl")
+
+    @classmethod
+    def load(cls, env_file: Path | None = None) -> "Settings":
+        load_dotenv(dotenv_path=env_file or Path(".env"))
+        return cls(
+            api_key=os.getenv("MERAKI_DASHBOARD_API_KEY", "").strip(),
+            max_retries=max(0, int(os.getenv("MERAKI_MAX_RETRIES", "4"))),
+            retry_base_seconds=max(
+                0.0, float(os.getenv("MERAKI_RETRY_BASE_SECONDS", "1.0"))
+            ),
+            early_access=os.getenv("MERAKI_ENABLE_EARLY_ACCESS", "true").lower()
+            in {"1", "true", "yes", "on"},
+        )
+
+    def validate(self) -> None:
+        if not self.api_key:
+            raise ValueError(
+                "MERAKI_DASHBOARD_API_KEY is missing. Copy .env.example to .env "
+                "and add your Dashboard API key."
+            )
+

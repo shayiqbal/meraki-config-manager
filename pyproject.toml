@@ -1,0 +1,12 @@
+[project]
+name = "meraki-vpn-exclusion-manager"
+version = "1.0.0"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --disable-warnings"
+
+[tool.coverage.run]
+source = ["config", "meraki_client", "rules", "services", "reporting"]
+

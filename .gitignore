@@ -1,0 +1,15 @@
+.env
+.venv/
+.build_venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+logs/
+exports/
+build/
+dist/
+Output/
+.DS_Store
+*.pdf

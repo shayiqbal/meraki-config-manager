@@ -1,0 +1,12 @@
+organizationId,organizationName,networkId,networkName,ruleOrder,ruleType,categoryOrder,protocol,destination,port,source,id,name,action
+947101,Graybar,L_585467951558195700,31-GHIL,1,customLayer3,1,any,64.62.142.12/32,any,any,,,upsert
+947101,Graybar,L_585467951558195700,31-GHIL,2,customLayer3,2,any,158.115.128.0/19,any,any,,,upsert
+947101,Graybar,L_585467951558195700,31-GHIL,3,customLayer3,3,any,209.206.48.0/20,any,any,,,upsert
+947101,Graybar,L_585467951558195700,31-GHIL,4,customLayer3,4,any,216.157.128.0/20,any,any,,,upsert
+947101,Graybar,L_585467951558195700,31-GHIL,5,customLayer3,5,any,40.91.120.100/32,any,any,,,upsert
+947101,Graybar,L_585467951558195700,31-GHIL,6,dns,6,dns,cisco.com,any,any,,,upsert
+947101,Graybar,L_585467951558195700,31-GHIL,7,dns,7,dns,meraki.com,any,any,,,upsert
+947101,Graybar,L_585467951558195700,31-GHIL,8,dns,8,dns,meraki-applications.com,any,any,,,upsert
+947101,Graybar,L_585467951558195700,31-GHIL,9,dns,9,dns,threatgrid.com,any,any,,,upsert
+947101,Graybar,L_585467951558195700,31-GHIL,10,application,1,any,,any,any,meraki:layer7/application/1208,Microsoft Teams,upsert
+
