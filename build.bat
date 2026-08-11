@@ -1,5 +1,6 @@
 @echo off
 setlocal EnableDelayedExpansion
+cd /d "%~dp0"
 title GrayBar Meraki Manager — Build Script
 
 :: ── Require Administrator privileges ─────────────────────────────────────────
