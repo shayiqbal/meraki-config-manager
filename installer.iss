@@ -26,9 +26,6 @@ OutputDir=Output
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
-WizardSmallImageFile=
-; Installer look
-SetupIconFile=
 UninstallDisplayName={#AppName}
 UninstallDisplayIcon={app}\{#AppExeName}
 
@@ -36,7 +33,7 @@ UninstallDisplayIcon={app}\{#AppExeName}
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
-Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Additional icons:"; Flags: checked
+Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Additional icons:"
 
 [Files]
 ; Bundle the entire PyInstaller output folder
@@ -51,9 +48,7 @@ Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExeName}"; Tasks: deskto
 
 [Run]
 ; Offer to launch the app immediately after install
-Filename: "{app}\{#AppExeName}"; \
-    Description: "Launch {#AppName} now"; \
-    Flags: nowait postinstall skipifsilent
+Filename: "{app}\{#AppExeName}"; Description: "Launch {#AppName} now"; Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]
 ; Clean up the logs folder created at runtime
