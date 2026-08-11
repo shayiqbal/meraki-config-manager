@@ -398,11 +398,11 @@ class MainWindowV1(QMainWindow):
         """Disconnect and reconnect with a new API key (or reload .env in dev mode)."""
         # Client build (no .env): show the API key dialog again
         if not self._show_credits:
-            from main_client import ApiKeyDialog
-            dlg = ApiKeyDialog(self)
+            from main_client import LoginDialog
+            dlg = LoginDialog(self)
             if dlg.exec() != dlg.DialogCode.Accepted:
                 return
-            new_key = dlg.validated_key()
+            new_key = dlg.authenticated_key()
             if not new_key:
                 return
             self._settings = Settings(
