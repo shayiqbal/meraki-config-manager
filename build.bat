@@ -2,6 +2,16 @@
 setlocal EnableDelayedExpansion
 title GrayBar Meraki Manager — Build Script
 
+:: ── Require Administrator privileges ─────────────────────────────────────────
+net session >nul 2>&1
+if errorlevel 1 (
+    echo.
+    echo [ERROR] This script must be run as Administrator.
+    echo         Right-click build.bat and choose "Run as administrator".
+    echo.
+    pause & exit /b 1
+)
+
 echo.
 echo ============================================================
 echo   GrayBar Meraki Manager — Windows Installer Builder
@@ -14,7 +24,7 @@ set PYTHON_VERSION=3.12.9
 set PYTHON_URL=https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-amd64.exe
 set PYTHON_INSTALLER=%TEMP%\python-installer.exe
 set INNO_VERSION=6.3.3
-set INNO_URL=https://jrsoftware.org/download.php/is.exe
+set INNO_URL=https://files.jrsoftware.org/is/6/innosetup-6.3.3.exe
 set INNO_INSTALLER=%TEMP%\innosetup-installer.exe
 set INNO_PATH=C:\Program Files (x86)\Inno Setup 6\ISCC.exe
 set VENV_DIR=.build_venv
@@ -114,6 +124,14 @@ if not exist "%INNO_PATH%" (
     "%INNO_INSTALLER%" /VERYSILENT /NORESTART /SUPPRESSMSGBOXES
     if errorlevel 1 (
         echo [ERROR] Inno Setup installation failed.
+        pause & exit /b 1
+    )
+    :: Give the installer a moment to finish writing files
+    timeout /t 5 /nobreak >nul
+    if not exist "%INNO_PATH%" (
+        echo [ERROR] Inno Setup installed but ISCC.exe not found at:
+        echo         %INNO_PATH%
+        echo         Try installing Inno Setup manually from https://jrsoftware.org/isdl.php
         pause & exit /b 1
     )
     echo       Inno Setup installed.
