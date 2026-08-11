@@ -140,9 +140,9 @@ if "!ISCC_EXE!"=="" (
     if errorlevel 1 (
         call :fail "Failed to download Inno Setup from GitHub. Check your internet connection."
     )
-    echo       Installing Inno Setup silently...
-    "%INNO_INSTALLER%" /VERYSILENT /NORESTART /SUPPRESSMSGBOXES
-    echo       Waiting for install to complete...
+        echo       Installing Inno Setup silently...
+        "%INNO_INSTALLER%" /VERYSILENT /NORESTART /SUPPRESSMSGBOXES "/DIR=%ProgramFiles(x86)%\Inno Setup 6"
+        echo       Waiting for install to complete...
     timeout /t 15 /nobreak >nul
     call :find_iscc
 )
@@ -186,21 +186,29 @@ exit /b 0
 :: ── Subroutine: find ISCC.exe in standard locations --------------------------
 :find_iscc
 set "ISCC_EXE="
-if exist "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" (
-    set "ISCC_EXE=C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+if exist "%ProgramFiles(x86)%\Inno Setup 6\ISCC.exe" (
+    set "ISCC_EXE=%ProgramFiles(x86)%\Inno Setup 6\ISCC.exe"
     goto :eof
 )
-if exist "C:\Program Files\Inno Setup 6\ISCC.exe" (
-    set "ISCC_EXE=C:\Program Files\Inno Setup 6\ISCC.exe"
+if exist "%ProgramFiles%\Inno Setup 6\ISCC.exe" (
+    set "ISCC_EXE=%ProgramFiles%\Inno Setup 6\ISCC.exe"
     goto :eof
 )
 for /f "delims=" %%i in ('where ISCC.exe 2^>nul') do (
     set "ISCC_EXE=%%i"
     goto :eof
 )
+for /f "delims=" %%i in ('dir /s /b "%ProgramFiles(x86)%\ISCC.exe" 2^>nul') do (
+    set "ISCC_EXE=%%i"
+    goto :eof
+)
+for /f "delims=" %%i in ('dir /s /b "%ProgramFiles%\ISCC.exe" 2^>nul') do (
+    set "ISCC_EXE=%%i"
+    goto :eof
+)
 goto :eof
 
-:: ── Subroutine: print error, dump log tail, pause ----------------------------
+:: ── Subroutine: print error, dump log tail, pause, EXIT WHOLE SCRIPT ---------
 :fail
 echo.
 echo [ERROR] %~1
@@ -213,4 +221,4 @@ echo.
 echo Full log: %LOGFILE%
 echo.
 pause
-exit /b 1
+exit 1
