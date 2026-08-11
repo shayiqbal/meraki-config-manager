@@ -1,27 +1,27 @@
 @echo off
 setlocal EnableDelayedExpansion
 cd /d "%~dp0"
-title GrayBar Meraki Manager — Build Script
+title GrayBar Meraki Manager - Build Script
 
-:: ── Log file ──────────────────────────────────────────────────────────────────
+:: ── Log file ------------------------------------------------------------------
 set "LOGFILE=%~dp0build.log"
 echo Build started: %date% %time% > "%LOGFILE%"
 echo. >> "%LOGFILE%"
 echo Log file: %LOGFILE%
 
-:: ── Require Administrator privileges ─────────────────────────────────────────
+:: ── Require Administrator privileges -----------------------------------------
 net session >nul 2>&1
 if errorlevel 1 (
-    call :fail "This script must be run as Administrator. Right-click build.bat and choose 'Run as administrator'."
+    call :fail "This script must be run as Administrator. Right-click build.bat and choose Run as administrator."
 )
 
 echo.
 echo ============================================================
-echo   GrayBar Meraki Manager — Windows Installer Builder
+echo   GrayBar Meraki Manager - Windows Installer Builder
 echo ============================================================
 echo.
 
-:: ── Configuration ────────────────────────────────────────────────────────────
+:: ── Configuration ------------------------------------------------------------
 set APP_NAME=GrayBarMerakiManager
 set PYTHON_VERSION=3.12.9
 set PYTHON_URL=https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-amd64.exe
@@ -30,16 +30,17 @@ set INNO_VERSION=6.7.3
 set INNO_URL=https://github.com/jrsoftware/issrc/releases/download/is-6_7_3/innosetup-6.7.3.exe
 set INNO_INSTALLER=%TEMP%\innosetup-6.7.3.exe
 set INNO_PATH=C:\Program Files (x86)\Inno Setup 6\ISCC.exe
+set INNO_PATH_64=C:\Program Files\Inno Setup 6\ISCC.exe
 set VENV_DIR=.build_venv
 set OUTPUT_DIR=Output
 
-:: ── Check for internet connectivity ──────────────────────────────────────────
+:: ── Check for internet connectivity ------------------------------------------
 ping -n 1 www.python.org >nul 2>&1
 if errorlevel 1 (
     call :fail "No internet connection detected. Please connect to the internet and try again."
 )
 
-:: ── Step 1: Python ────────────────────────────────────────────────────────────
+:: ── Step 1: Python -----------------------------------------------------------
 echo [1/6] Checking for Python...
 echo [1/6] Checking for Python... >> "%LOGFILE%"
 python --version >nul 2>&1
@@ -63,7 +64,7 @@ if errorlevel 1 (
     echo       Found Python !PYVER! >> "%LOGFILE%"
 )
 
-:: ── Step 2: Virtual environment ───────────────────────────────────────────────
+:: ── Step 2: Virtual environment ----------------------------------------------
 echo.
 echo [2/6] Setting up virtual environment...
 echo [2/6] Setting up virtual environment... >> "%LOGFILE%"
@@ -78,7 +79,7 @@ if errorlevel 1 (
 call "%VENV_DIR%\Scripts\activate.bat"
 echo       Virtual environment ready.
 
-:: ── Step 3: Install dependencies ─────────────────────────────────────────────
+:: ── Step 3: Install dependencies ---------------------------------------------
 echo.
 echo [3/6] Installing dependencies (this may take 2-3 minutes)...
 echo [3/6] Installing dependencies... >> "%LOGFILE%"
@@ -88,18 +89,18 @@ python -m pip install --upgrade pip >> "%LOGFILE%" 2>&1
 echo       Installing requirements.txt...
 pip install -r requirements.txt >> "%LOGFILE%" 2>&1
 if errorlevel 1 (
-    call :fail "Failed to install requirements.txt — see build.log for details."
+    call :fail "Failed to install requirements.txt - see build.log for details."
 )
 
 echo       Installing PyInstaller...
 pip install pyinstaller >> "%LOGFILE%" 2>&1
 if errorlevel 1 (
-    call :fail "Failed to install PyInstaller — see build.log for details."
+    call :fail "Failed to install PyInstaller - see build.log for details."
 )
 echo       Dependencies installed.
 echo       Dependencies installed. >> "%LOGFILE%"
 
-:: ── Step 4: PyInstaller bundle ────────────────────────────────────────────────
+:: ── Step 4: PyInstaller bundle -----------------------------------------------
 echo.
 echo [4/6] Building application bundle (this takes 3-5 minutes)...
 echo [4/6] PyInstaller build starting... >> "%LOGFILE%"
@@ -108,55 +109,63 @@ if exist "build" rmdir /s /q "build"
 
 pyinstaller meraki_client.spec --noconfirm --clean >> "%LOGFILE%" 2>&1
 if errorlevel 1 (
-    call :fail "PyInstaller build failed — open build.log to see the full error."
+    call :fail "PyInstaller build failed - open build.log to see the full error."
 )
 if not exist "dist\%APP_NAME%\%APP_NAME%.exe" (
-    call :fail "Build output not found at dist\%APP_NAME%\%APP_NAME%.exe — PyInstaller may have failed silently. Check build.log."
+    call :fail "Build output not found at dist\%APP_NAME%\%APP_NAME%.exe - check build.log."
 )
 echo       Bundle created: dist\%APP_NAME%\
 echo       Bundle created. >> "%LOGFILE%"
 
-:: ── Step 5: Inno Setup ────────────────────────────────────────────────────────
+:: ── Step 5: Inno Setup -------------------------------------------------------
 echo.
 echo [5/6] Checking for Inno Setup...
 echo [5/6] Checking for Inno Setup... >> "%LOGFILE%"
-if not exist "%INNO_PATH%" (
-    echo       Inno Setup not found. Trying winget first...
+
+:: Resolve ISCC.exe - check x86 and x64 Program Files
+call :find_iscc
+if "!ISCC_EXE!"=="" (
+    echo       Inno Setup not found. Installing via winget...
     echo       Attempting winget install... >> "%LOGFILE%"
-    winget install --id JRSoftware.InnoSetup -e -s winget --silent --accept-package-agreements --accept-source-agreements >> "%LOGFILE%" 2>&1
-    if not exist "%INNO_PATH%" (
-        echo       winget did not find it — downloading installer directly...
-        echo       Falling back to direct download: %INNO_URL% >> "%LOGFILE%"
-        powershell -Command "& {[Net.ServicePointManager]::SecurityProtocol='Tls12'; Invoke-WebRequest -Uri '%INNO_URL%' -OutFile '%INNO_INSTALLER%'}" >> "%LOGFILE%" 2>&1
-        if errorlevel 1 (
-            call :fail "Failed to download Inno Setup from GitHub. Check internet connection."
-        )
-        echo       Installing Inno Setup silently...
-        "%INNO_INSTALLER%" /VERYSILENT /NORESTART /SUPPRESSMSGBOXES >> "%LOGFILE%" 2>&1
-        timeout /t 5 /nobreak >nul
-    )
-    if not exist "%INNO_PATH%" (
-        call :fail "Inno Setup install failed. Install it manually: https://jrsoftware.org/isdl.php then re-run build.bat."
-    )
-    echo       Inno Setup installed.
-    echo       Inno Setup installed. >> "%LOGFILE%"
-) else (
-    echo       Inno Setup already installed.
-    echo       Inno Setup already installed. >> "%LOGFILE%"
+    winget install --id JRSoftware.InnoSetup -e -s winget --silent --accept-package-agreements --accept-source-agreements
+    echo       Waiting for install to complete...
+    timeout /t 15 /nobreak >nul
+    call :find_iscc
 )
 
-:: ── Step 6: Create installer ──────────────────────────────────────────────────
+if "!ISCC_EXE!"=="" (
+    echo       winget did not place ISCC.exe - downloading installer directly...
+    echo       Downloading: %INNO_URL% >> "%LOGFILE%"
+    powershell -Command "& {[Net.ServicePointManager]::SecurityProtocol='Tls12'; Invoke-WebRequest -Uri '%INNO_URL%' -OutFile '%INNO_INSTALLER%'}" >> "%LOGFILE%" 2>&1
+    if errorlevel 1 (
+        call :fail "Failed to download Inno Setup from GitHub. Check your internet connection."
+    )
+    echo       Installing Inno Setup silently...
+    "%INNO_INSTALLER%" /VERYSILENT /NORESTART /SUPPRESSMSGBOXES
+    echo       Waiting for install to complete...
+    timeout /t 15 /nobreak >nul
+    call :find_iscc
+)
+
+if "!ISCC_EXE!"=="" (
+    call :fail "Inno Setup could not be found after install. Install it manually from https://jrsoftware.org/isdl.php then re-run."
+)
+
+echo       Inno Setup found: !ISCC_EXE!
+echo       Inno Setup found: !ISCC_EXE! >> "%LOGFILE%"
+
+:: ── Step 6: Create installer -------------------------------------------------
 echo.
 echo [6/6] Creating Windows installer...
 echo [6/6] Running ISCC... >> "%LOGFILE%"
 if exist "%OUTPUT_DIR%" rmdir /s /q "%OUTPUT_DIR%"
 mkdir "%OUTPUT_DIR%"
-"%INNO_PATH%" installer.iss >> "%LOGFILE%" 2>&1
+"!ISCC_EXE!" installer.iss >> "%LOGFILE%" 2>&1
 if errorlevel 1 (
-    call :fail "Inno Setup failed to create the installer — open build.log to see the full error."
+    call :fail "Inno Setup failed to create the installer - open build.log to see the full error."
 )
 
-:: ── Done ──────────────────────────────────────────────────────────────────────
+:: ── Done ---------------------------------------------------------------------
 echo.
 echo ============================================================
 echo   BUILD COMPLETE
@@ -174,15 +183,32 @@ explorer "%OUTPUT_DIR%"
 pause
 exit /b 0
 
-:: ── Helper: print error, dump tail of log, pause ──────────────────────────────
+:: ── Subroutine: find ISCC.exe in standard locations --------------------------
+:find_iscc
+set "ISCC_EXE="
+if exist "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" (
+    set "ISCC_EXE=C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+    goto :eof
+)
+if exist "C:\Program Files\Inno Setup 6\ISCC.exe" (
+    set "ISCC_EXE=C:\Program Files\Inno Setup 6\ISCC.exe"
+    goto :eof
+)
+for /f "delims=" %%i in ('where ISCC.exe 2^>nul') do (
+    set "ISCC_EXE=%%i"
+    goto :eof
+)
+goto :eof
+
+:: ── Subroutine: print error, dump log tail, pause ----------------------------
 :fail
 echo.
 echo [ERROR] %~1
 echo [ERROR] %~1 >> "%LOGFILE%"
 echo.
-echo ── Last lines of build.log ──────────────────────────────────────────────────
+echo ---- Last 30 lines of build.log ----------------------------------------
 powershell -Command "if (Test-Path '%LOGFILE%') { Get-Content '%LOGFILE%' | Select-Object -Last 30 }"
-echo ─────────────────────────────────────────────────────────────────────────────
+echo ------------------------------------------------------------------------
 echo.
 echo Full log: %LOGFILE%
 echo.
