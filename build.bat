@@ -26,9 +26,9 @@ set APP_NAME=GrayBarMerakiManager
 set PYTHON_VERSION=3.12.9
 set PYTHON_URL=https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-amd64.exe
 set PYTHON_INSTALLER=%TEMP%\python-installer.exe
-set INNO_VERSION=6.3.3
-set INNO_URL=https://files.jrsoftware.org/is/6/innosetup-6.3.3.exe
-set INNO_INSTALLER=%TEMP%\innosetup-installer.exe
+set INNO_VERSION=6.7.3
+set INNO_URL=https://github.com/jrsoftware/issrc/releases/download/is-6_7_3/innosetup-6.7.3.exe
+set INNO_INSTALLER=%TEMP%\innosetup-6.7.3.exe
 set INNO_PATH=C:\Program Files (x86)\Inno Setup 6\ISCC.exe
 set VENV_DIR=.build_venv
 set OUTPUT_DIR=Output
@@ -121,19 +121,22 @@ echo.
 echo [5/6] Checking for Inno Setup...
 echo [5/6] Checking for Inno Setup... >> "%LOGFILE%"
 if not exist "%INNO_PATH%" (
-    echo       Inno Setup not found. Downloading...
-    powershell -Command "& {[Net.ServicePointManager]::SecurityProtocol='Tls12'; Invoke-WebRequest -Uri '%INNO_URL%' -OutFile '%INNO_INSTALLER%'}" >> "%LOGFILE%" 2>&1
-    if errorlevel 1 (
-        call :fail "Failed to download Inno Setup — check internet connection."
-    )
-    echo       Installing Inno Setup silently...
-    "%INNO_INSTALLER%" /VERYSILENT /NORESTART /SUPPRESSMSGBOXES >> "%LOGFILE%" 2>&1
-    if errorlevel 1 (
-        call :fail "Inno Setup installation failed — see build.log."
-    )
-    timeout /t 5 /nobreak >nul
+    echo       Inno Setup not found. Trying winget first...
+    echo       Attempting winget install... >> "%LOGFILE%"
+    winget install --id JRSoftware.InnoSetup -e -s winget --silent --accept-package-agreements --accept-source-agreements >> "%LOGFILE%" 2>&1
     if not exist "%INNO_PATH%" (
-        call :fail "Inno Setup installed but ISCC.exe not found at: %INNO_PATH% — try installing Inno Setup 6 manually from https://jrsoftware.org/isdl.php"
+        echo       winget did not find it — downloading installer directly...
+        echo       Falling back to direct download: %INNO_URL% >> "%LOGFILE%"
+        powershell -Command "& {[Net.ServicePointManager]::SecurityProtocol='Tls12'; Invoke-WebRequest -Uri '%INNO_URL%' -OutFile '%INNO_INSTALLER%'}" >> "%LOGFILE%" 2>&1
+        if errorlevel 1 (
+            call :fail "Failed to download Inno Setup from GitHub. Check internet connection."
+        )
+        echo       Installing Inno Setup silently...
+        "%INNO_INSTALLER%" /VERYSILENT /NORESTART /SUPPRESSMSGBOXES >> "%LOGFILE%" 2>&1
+        timeout /t 5 /nobreak >nul
+    )
+    if not exist "%INNO_PATH%" (
+        call :fail "Inno Setup install failed. Install it manually: https://jrsoftware.org/isdl.php then re-run build.bat."
     )
     echo       Inno Setup installed.
     echo       Inno Setup installed. >> "%LOGFILE%"
