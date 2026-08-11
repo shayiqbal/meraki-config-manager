@@ -34,11 +34,12 @@ from auth.profile_store import (
     delete_profile,
     username_exists,
 )
-from config.settings import Settings
+from config.settings import Settings, user_data_dir
 from gui.v1.main_window_v1 import MainWindowV1
 
 _APP_NAME  = "GrayBar Meraki Manager"
-_FAULT_LOG = Path("logs/faulthandler.log")
+_LOG_DIR   = user_data_dir() / "logs"
+_FAULT_LOG = _LOG_DIR / "faulthandler.log"
 
 # ── Shared stylesheet ──────────────────────────────────────────────────────────
 _STYLE = """
@@ -124,7 +125,7 @@ def _install_handlers() -> None:
     def _hook(exc_type, exc_value, exc_tb):
         msg = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
         try:
-            with open("logs/crash.log", "a") as f:
+            with open(_LOG_DIR / "crash.log", "a") as f:
                 f.write(f"\n{'─'*60}\n{msg}\n")
         except Exception:
             pass

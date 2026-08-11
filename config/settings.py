@@ -2,10 +2,26 @@
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
+import sys
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from dotenv import load_dotenv
+
+
+def user_data_dir(app_name: str = "GrayBar Meraki Manager") -> Path:
+    """Return a writable per-user data directory regardless of install location.
+
+    On Windows this is %LOCALAPPDATA%\\<app_name>.
+    Falls back to ~/.config/<app_name> on macOS/Linux.
+    """
+    if sys.platform == "win32":
+        base = Path(os.environ.get("LOCALAPPDATA") or Path.home())
+    elif sys.platform == "darwin":
+        base = Path.home() / "Library" / "Application Support"
+    else:
+        base = Path(os.environ.get("XDG_DATA_HOME") or (Path.home() / ".local" / "share"))
+    return base / app_name
 
 
 @dataclass(frozen=True, slots=True)
@@ -14,7 +30,9 @@ class Settings:
     max_retries: int = 4
     retry_base_seconds: float = 1.0
     early_access: bool = True
-    log_path: Path = Path("logs/vpn_exclusion_manager.jsonl")
+    log_path: Path = field(
+        default_factory=lambda: user_data_dir() / "logs" / "vpn_exclusion_manager.jsonl"
+    )
 
     @classmethod
     def load(cls, env_file: Path | None = None) -> "Settings":
