@@ -85,15 +85,16 @@ echo [3/6] Installing dependencies (this may take 2-3 minutes)...
 echo [3/6] Installing dependencies... >> "%LOGFILE%"
 
 python -m pip install --upgrade pip >> "%LOGFILE%" 2>&1
+timeout /t 3 /nobreak >nul
 
 echo       Installing requirements.txt...
-pip install -r requirements.txt >> "%LOGFILE%" 2>&1
+python -m pip install -r requirements.txt >> "%LOGFILE%" 2>&1
 if errorlevel 1 (
     call :fail "Failed to install requirements.txt - see build.log for details."
 )
 
 echo       Installing PyInstaller...
-pip install pyinstaller >> "%LOGFILE%" 2>&1
+python -m pip install pyinstaller >> "%LOGFILE%" 2>&1
 if errorlevel 1 (
     call :fail "Failed to install PyInstaller - see build.log for details."
 )
