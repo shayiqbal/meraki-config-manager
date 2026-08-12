@@ -167,6 +167,9 @@ if errorlevel 1 (
     call :fail "Inno Setup failed to create the installer - open build.log to see the full error."
 )
 
+:: Grant all users read+execute on the installer so it can be run without admin
+icacls "%OUTPUT_DIR%\GrayBarMerakiManager-Setup.exe" /grant "Users:(RX)" /grant "Everyone:(RX)" >nul 2>&1
+
 :: ── Done ---------------------------------------------------------------------
 echo.
 echo ============================================================
