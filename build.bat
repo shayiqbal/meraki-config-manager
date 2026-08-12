@@ -107,8 +107,9 @@ echo [4/6] Building application bundle (this takes 3-5 minutes)...
 echo [4/6] PyInstaller build starting... >> "%LOGFILE%"
 if exist "dist" rmdir /s /q "dist"
 if exist "build" rmdir /s /q "build"
+timeout /t 3 /nobreak >nul
 
-pyinstaller meraki_client.spec --noconfirm --clean >> "%LOGFILE%" 2>&1
+python -m PyInstaller meraki_client.spec --noconfirm --clean >> "%LOGFILE%" 2>&1
 if errorlevel 1 (
     call :fail "PyInstaller build failed - open build.log to see the full error."
 )
