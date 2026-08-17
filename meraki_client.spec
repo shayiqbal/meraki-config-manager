@@ -1,12 +1,12 @@
 # -*- mode: python ; coding: utf-8 -*-
-# PyInstaller spec for GrayBar Meraki Manager (Windows build)
+# PyInstaller spec for Meraki Config Manager (Windows build)
 # Run from the project root:  pyinstaller meraki_client.spec
 
 import sys
 from pathlib import Path
 
 block_cipher = None
-APP_NAME = "GrayBarMerakiManager"
+APP_NAME = "MerakiConfigManager"
 
 a = Analysis(
     ["main_client.py"],
@@ -65,6 +65,7 @@ a = Analysis(
         "gui.v1.widgets.exclusions_panel",
         "gui.v1.widgets.compare_panel",
         "gui.v1.widgets.copy_wizard",
+        "gui.v1.widgets.group_policy_wizard",
         "gui.v1.widgets.new_network_wizard",
         "gui.v1.widgets.activity_log",
         "gui.v1.dialogs.rule_editor_v1",
@@ -82,6 +83,7 @@ a = Analysis(
         "services",
         "services.workflow",
         "services.copy_service",
+        "services.group_policy_service",
         "services.compare_service",
         "services.network_service",
         "reporting",

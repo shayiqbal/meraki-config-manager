@@ -27,6 +27,7 @@ from gui.v1.widgets.activity_log import ActivityLogPanel
 from gui.v1.widgets.compare_panel import ComparePanel
 from gui.v1.widgets.copy_wizard import CopyWizardPanel
 from gui.v1.widgets.dashboard import DashboardPanel
+from gui.v1.widgets.group_policy_wizard import GroupPolicyWizardPanel
 from gui.v1.widgets.networks_panel import NetworksPanel
 from gui.v1.widgets.new_network_wizard import NewNetworkWizardPanel
 from gui.workers import Worker
@@ -34,6 +35,7 @@ from meraki_client.client_v1 import MerakiVpnClientV1
 from reporting.logging_config import configure_logging
 from services.compare_service import CompareService as CompareNetworksService
 from services.copy_service import CopyService
+from services.group_policy_service import GroupPolicyCopyService
 from services.network_service import NetworkService
 from services.workflow import WorkflowService
 
@@ -79,12 +81,13 @@ class _Dispatcher(QObject):
 
 # ─── Sidebar navigation entries ───────────────────────────────────────────────
 _NAV = [
-    ("dashboard",    "  🏠  Dashboard"),
-    ("networks",     "  🌐  Networks"),
-    ("compare",     "  🔍  Compare Networks"),
-    ("copy",         "  📋  Copy Rules"),
-    ("new_network",  "  ➕  New Network"),
-    ("activity",     "  📝  Activity Log"),
+    ("dashboard",       "  🏠  Dashboard"),
+    ("networks",        "  🌐  Networks"),
+    ("compare",        "  🔍  Compare Networks"),
+    ("copy",            "  📋  Copy Rules"),
+    ("group_policies",  "  🗂  Group Policies"),
+    ("new_network",     "  ➕  New Network"),
+    ("activity",        "  📝  Activity Log"),
 ]
 
 
@@ -112,6 +115,7 @@ class MainWindowV1(QMainWindow):
         self._client: MerakiVpnClientV1 | None = None
         self._workflow: WorkflowService | None = None
         self._copy_service: CopyService | None = None
+        self._group_policy_service: GroupPolicyCopyService | None = None
         self._network_service: NetworkService | None = None
         self._compare_service: CompareNetworksService | None = None
 
@@ -156,6 +160,7 @@ class MainWindowV1(QMainWindow):
         self.networks_changed.connect(self._networks_panel.refresh)
         self.networks_changed.connect(self._compare_panel.refresh)
         self.networks_changed.connect(self._copy_wizard.refresh)
+        self.networks_changed.connect(self._group_policy_wizard.refresh)
         self.networks_changed.connect(self._new_network.refresh)
 
         # ── Initial connection ─────────────────────────────────────────────
@@ -267,16 +272,18 @@ class MainWindowV1(QMainWindow):
         self._networks_panel = NetworksPanel(self)
         self._compare_panel = ComparePanel(self)
         self._copy_wizard = CopyWizardPanel(self)
+        self._group_policy_wizard = GroupPolicyWizardPanel(self)
         self._new_network = NewNetworkWizardPanel(self)
         self._activity_log = ActivityLogPanel(self)
 
         self._panels = {
-            "dashboard": self._dashboard,
-            "networks": self._networks_panel,
-            "compare": self._compare_panel,
-            "copy": self._copy_wizard,
-            "new_network": self._new_network,
-            "activity": self._activity_log,
+            "dashboard":      self._dashboard,
+            "networks":       self._networks_panel,
+            "compare":        self._compare_panel,
+            "copy":           self._copy_wizard,
+            "group_policies": self._group_policy_wizard,
+            "new_network":    self._new_network,
+            "activity":       self._activity_log,
         }
         for panel in self._panels.values():
             self._content.addWidget(panel)
@@ -294,12 +301,13 @@ class MainWindowV1(QMainWindow):
             btn.setChecked(k == key)
         # Update top-bar page title
         labels = {
-            "dashboard": "Dashboard",
-            "networks": "Networks",
-            "compare": "Compare Networks",
-            "copy": "Copy Rules",
-            "new_network": "New Network",
-            "activity": "Activity Log",
+            "dashboard":      "Dashboard",
+            "networks":       "Networks",
+            "compare":        "Compare Networks",
+            "copy":           "Copy Rules",
+            "group_policies": "Group Policies",
+            "new_network":    "New Network",
+            "activity":       "Activity Log",
         }
         self._page_title_label.setText(labels.get(key, ""))
         # Handle contextual navigation
@@ -314,6 +322,7 @@ class MainWindowV1(QMainWindow):
             self._client = MerakiVpnClientV1(self._settings, self._logger)
             self._workflow = WorkflowService(self._client)
             self._copy_service = CopyService(self._client)
+            self._group_policy_service = GroupPolicyCopyService(self._client)
             self._network_service = NetworkService(self._client)
             self._compare_service = CompareNetworksService(self._client)
         except Exception as exc:
@@ -431,6 +440,7 @@ class MainWindowV1(QMainWindow):
         self._client = None
         self._workflow = None
         self._copy_service = None
+        self._group_policy_service = None
         self._network_service = None
         self._organizations = []
         self._networks = []
@@ -545,6 +555,9 @@ class MainWindowV1(QMainWindow):
 
     def get_copy_service(self) -> CopyService | None:
         return self._copy_service
+
+    def get_group_policy_service(self) -> GroupPolicyCopyService | None:
+        return self._group_policy_service
 
     def get_network_service(self) -> NetworkService | None:
         return self._network_service

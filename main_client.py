@@ -1,4 +1,4 @@
-"""GrayBar Meraki Manager v2 — Client Entry Point with Profile Authentication.
+"""Meraki Config Manager — Client Entry Point with Profile Authentication.
 
 Login flow:
   Landing  →  New User   →  Create profile (username + password + API key)
@@ -37,7 +37,7 @@ from auth.profile_store import (
 from config.settings import Settings, user_data_dir
 from gui.v1.main_window_v1 import MainWindowV1
 
-_APP_NAME  = "GrayBar Meraki Manager"
+_APP_NAME  = "Meraki Config Manager"
 _LOG_DIR   = user_data_dir() / "logs"
 _FAULT_LOG = _LOG_DIR / "faulthandler.log"
 
@@ -568,7 +568,7 @@ def main() -> int:
 
     app = _App(sys.argv)
     app.setApplicationName(_APP_NAME)
-    app.setOrganizationName("GrayBar")
+    app.setOrganizationName("MerakiConfigManager")
 
     dlg = LoginDialog()
     if dlg.exec() != QDialog.DialogCode.Accepted:

@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableDelayedExpansion
 cd /d "%~dp0"
-title GrayBar Meraki Manager - Build Script
+title Meraki Config Manager - Build Script
 
 :: ── Log file ------------------------------------------------------------------
 set "LOGFILE=%~dp0build.log"
@@ -17,12 +17,12 @@ if errorlevel 1 (
 
 echo.
 echo ============================================================
-echo   GrayBar Meraki Manager - Windows Installer Builder
+echo   Meraki Config Manager - Windows Installer Builder
 echo ============================================================
 echo.
 
 :: ── Configuration ------------------------------------------------------------
-set APP_NAME=GrayBarMerakiManager
+set APP_NAME=MerakiConfigManager
 set PYTHON_VERSION=3.12.9
 set PYTHON_URL=https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-amd64.exe
 set PYTHON_INSTALLER=%TEMP%\python-installer.exe
@@ -168,7 +168,7 @@ if errorlevel 1 (
 )
 
 :: Grant all users read+execute on the installer so it can be run without admin
-icacls "%OUTPUT_DIR%\GrayBarMerakiManager-Setup.exe" /grant "Users:(RX)" /grant "Everyone:(RX)" >nul 2>&1
+icacls "%OUTPUT_DIR%\MerakiConfigManager-Setup.exe" /grant "Users:(RX)" /grant "Everyone:(RX)" >nul 2>&1
 
 :: ── Done ---------------------------------------------------------------------
 echo.
@@ -176,7 +176,7 @@ echo ============================================================
 echo   BUILD COMPLETE
 echo ============================================================
 echo.
-echo   Installer: %OUTPUT_DIR%\GrayBarMerakiManager-Setup.exe
+echo   Installer: %OUTPUT_DIR%\MerakiConfigManager-Setup.exe
 echo.
 echo   Distribute this single file to your end users.
 echo   They double-click it, click Next a few times,

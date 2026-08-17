@@ -1,5 +1,5 @@
 [project]
-name = "meraki-vpn-exclusion-manager"
+name = "meraki-config-manager"
 version = "1.0.0"
 requires-python = ">=3.11"
 

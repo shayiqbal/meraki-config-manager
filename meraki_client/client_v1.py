@@ -179,3 +179,39 @@ class MerakiVpnClientV1(MerakiVpnClient):
             "update appliance settings",
             network_id=network_id,
         )
+
+    # ── Group policies ─────────────────────────────────────────────────────────
+
+    def get_group_policies(self, network_id: str) -> list[dict[str, Any]]:
+        """Return all group policies defined on a network."""
+        try:
+            return self._call(
+                lambda: self.dashboard.networks.getNetworkGroupPolicies(network_id),
+                "get group policies",
+                network_id=network_id,
+            )
+        except MerakiClientError:
+            return []
+
+    def create_group_policy(
+        self,
+        network_id: str,
+        policy_data: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Create a group policy on a network.
+
+        ``groupPolicyId`` is stripped from *policy_data* before the call —
+        Meraki assigns its own ID per network.
+        """
+        name = policy_data.get("name", "")
+        kwargs = {
+            k: v for k, v in policy_data.items()
+            if k not in {"groupPolicyId", "name"}
+        }
+        return self._call(
+            lambda: self.dashboard.networks.createNetworkGroupPolicy(
+                network_id, name, **kwargs
+            ),
+            "create group policy",
+            network_id=network_id,
+        )
