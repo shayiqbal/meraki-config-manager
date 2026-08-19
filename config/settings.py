@@ -9,7 +9,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 
-def user_data_dir(app_name: str = "GrayBar Meraki Manager") -> Path:
+def user_data_dir(app_name: str = "Meraki Config Manager") -> Path:
     """Return a writable per-user data directory regardless of install location.
 
     On Windows this is %LOCALAPPDATA%\\<app_name>.

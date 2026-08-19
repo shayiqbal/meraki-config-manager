@@ -238,9 +238,11 @@ class NewNetworkWizardPanel(QWidget):
             "Appliance settings  (client tracking method, deployment mode)"
         )
         self._chk_settings.setChecked(True)
+        self._chk_group_policies = QCheckBox("Group Policies")
         for chk in (
             self._chk_tags, self._chk_vpn, self._chk_routes,
-            self._chk_l3, self._chk_l7, self._chk_ssids, self._chk_settings,
+            self._chk_l3, self._chk_l7, self._chk_ssids,
+            self._chk_settings, self._chk_group_policies,
         ):
             box_lay.addWidget(chk)
         lay.addWidget(box)
@@ -419,10 +421,11 @@ class NewNetworkWizardPanel(QWidget):
         routes = len(config.static_routes)
         l3 = len(config.l3_firewall_rules)
         l7 = len(config.l7_firewall_rules)
+        gp = len(config.group_policies)
         self._template_status.setText(
             f"Template: {n}  —  "
             f"{excl} VPN exclusion(s), {routes} static route(s), "
-            f"{l3} L3 rule(s), {l7} L7 rule(s)"
+            f"{l3} L3 rule(s), {l7} L7 rule(s), {gp} group policy/policies"
         )
         # Pre-fill timezone from template
         tz = config.source_timezone
@@ -491,6 +494,10 @@ class NewNetworkWizardPanel(QWidget):
         lines.append(f"  {'✓' if self._chk_settings.isChecked() else '–'}  Appliance settings  "
                      f"(tracking: {tracking}, deployment: {deploy})")
 
+        gp_count = len(cfg.group_policies)
+        lines.append(f"  {'✓' if self._chk_group_policies.isChecked() else '–'}  Group Policies  "
+                     f"({gp_count} policy/policies on template)")
+
         lines.append("")
         lines.append("Will NOT be copied:")
         lines.append("  –  VLANs and VLAN subnets (network-unique)")
@@ -525,6 +532,7 @@ class NewNetworkWizardPanel(QWidget):
             copy_l7_firewall=self._chk_l7.isChecked(),
             copy_ssids=self._chk_ssids.isChecked(),
             copy_network_settings=self._chk_settings.isChecked(),
+            copy_group_policies=self._chk_group_policies.isChecked(),
             ssid_psks=dict(self._ssid_psks),
         )
         self._goto(4)  # show creating page

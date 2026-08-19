@@ -1,9 +1,9 @@
 """Profile store — encrypted per-user credential management.
 
 Profiles are stored in:
-  Windows:  %APPDATA%\\GrayBar Meraki Manager\\profiles.json
-  macOS:    ~/Library/Application Support/GrayBar Meraki Manager/profiles.json
-  Linux:    ~/.local/share/GrayBar Meraki Manager/profiles.json
+  Windows:  %APPDATA%\\Meraki Config Manager\\profiles.json
+  macOS:    ~/Library/Application Support/Meraki Config Manager/profiles.json
+  Linux:    ~/.local/share/Meraki Config Manager/profiles.json
 
 Each profile entry:
   {
@@ -37,7 +37,7 @@ import secrets
 
 # ── Storage path ───────────────────────────────────────────────────────────────
 
-_APP_DIR_NAME = "GrayBar Meraki Manager"
+_APP_DIR_NAME = "Meraki Config Manager"
 
 
 def _app_data_dir() -> Path:

@@ -22,6 +22,7 @@ class CloneableConfig:
     l7_firewall_rules: list[dict[str, Any]] = field(default_factory=list)
     ssids: list[dict[str, Any]] = field(default_factory=list)
     appliance_settings: dict[str, Any] = field(default_factory=dict)
+    group_policies: list[dict[str, Any]] = field(default_factory=list)
     source_product_types: list[str] = field(default_factory=list)
     source_timezone: str = "America/Los_Angeles"
 
@@ -38,6 +39,7 @@ class CreateNetworkOptions:
     copy_l7_firewall: bool = False
     copy_ssids: bool = False
     copy_network_settings: bool = False
+    copy_group_policies: bool = False
     # slot_number → PSK string (only for PSK-mode SSIDs; empty string = skip)
     ssid_psks: dict = field(default_factory=dict)
 
@@ -99,6 +101,10 @@ class NetworkService:
             config.appliance_settings = self.client.get_appliance_settings(network_id) or {}
         except Exception:
             config.appliance_settings = {}
+        try:
+            config.group_policies = self.client.get_group_policies(network_id) or []
+        except Exception:
+            config.group_policies = []
         return config
 
     def create_and_configure(
@@ -268,5 +274,31 @@ class NetworkService:
                     result.add_step("Copy network settings", False, str(exc))
             else:
                 result.add_step("Copy network settings", True, "No applicable settings on source")
+
+        if options.copy_group_policies and config.group_policies:
+            if progress:
+                progress("Copying group policies…")
+            added = 0
+            skipped = 0
+            errors: list[str] = []
+            existing = self.client.get_group_policies(result.network_id)
+            existing_names = {(p.get("name") or "").strip().lower() for p in existing}
+            for policy in config.group_policies:
+                name_key = (policy.get("name") or "").strip().lower()
+                if not name_key:
+                    continue
+                if name_key in existing_names:
+                    skipped += 1
+                    continue
+                try:
+                    self.client.create_group_policy(result.network_id, policy)
+                    added += 1
+                except Exception as exc:
+                    errors.append(f"{policy.get('name', '?')}: {exc}")
+            ok = len(errors) == 0
+            detail = f"{added} added, {skipped} already existed"
+            if errors:
+                detail += f"; {len(errors)} failed"
+            result.add_step("Copy group policies", ok, detail)
 
         return result
