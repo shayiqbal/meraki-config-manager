@@ -1,3 +1,4 @@
+"""Meraki Config Manager — shared pytest fixtures and test configuration."""
 from __future__ import annotations
 
 from pathlib import Path

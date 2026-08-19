@@ -1,4 +1,4 @@
-"""Deployment summary model and CSV/JSON exports."""
+"""Meraki Config Manager — deployment summary model and CSV/JSON exports."""
 from __future__ import annotations
 
 import csv

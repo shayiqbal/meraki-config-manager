@@ -2,10 +2,10 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Meraki VPN Exclusion Manager",
+      "name": "Meraki Config Manager",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/main.py",
+      "program": "${workspaceFolder}/main_client.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
       "envFile": "${workspaceFolder}/.env"

@@ -1,4 +1,4 @@
-"""Canonical models for Meraki VPN exclusion rules."""
+"""Meraki Config Manager — canonical models for VPN exclusion rules."""
 from __future__ import annotations
 
 import hashlib
